@@ -47,9 +47,9 @@
       <form id="add-key" autocomplete="off">
         <fieldset>
           <legend>Thêm khóa</legend>
-          <label>Tên hiển thị <input name="label" required></label>
-          <label>API key <input type="password" name="api_key" required></label>
-          <label>API secret <input type="password" name="api_secret" required></label>
+          <label>Tên hiển thị <input name="label" autocomplete="off" data-lpignore="true" required></label>
+          <label>API key <input type="password" name="api_key" autocomplete="new-password" data-lpignore="true" required></label>
+          <label>API secret <input type="password" name="api_secret" autocomplete="new-password" data-lpignore="true" required></label>
           <button>Xác minh và lưu</button>
         </fieldset>
       </form>

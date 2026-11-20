@@ -413,17 +413,26 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       connect();
     }
 
-    function fmtUsd(v) {
-      return '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function fmtNum(v, maxDp = 8) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return String(v ?? '');
+      return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: maxDp });
+    }
+
+    function fmtUsd(v, maxDp = 2) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return '$0';
+      const sign = n < 0 ? '-' : '';
+      return sign + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: maxDp });
     }
 
     function updatePriceDom() {
       ['BTCUSDT', 'ETHUSDT', 'PAXGUSDT'].forEach((sym) => {
         const t = state.ticks[sym];
         if (!t || t.price <= 0) return;
-        const pStr = fmtUsd(t.price);
-        const sign = t.pct >= 0 ? '+' : '';
-        const pctStr = `${sign}${t.pct.toFixed(2)}%`;
+        const pStr = fmtUsd(t.price, 2);
+        const sign = t.pct > 0 ? '+' : '';
+        const pctStr = `${sign}${fmtNum(t.pct, 2)}%`;
         const cls = t.pct > 0 ? 'text-[#34B37E]' : t.pct < 0 ? 'text-[#D64545]' : 'text-[#A5A79B]';
 
         ['top-price-', 'price-'].forEach((pre) => {
@@ -964,7 +973,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                   ` : `
                   <div class="panel-inset rounded-lg p-2.5">
                     <div class="text-[11px] text-[#A5A79B]">Thực nhận qua mạng BSC20 (BEP20)</div>
-                    <div id="wd-usdt-preview" class="text-base font-bold num text-[#34B37E] mt-0.5">${Number(state.withdrawDraft.amount).toFixed(2)} USDT</div>
+                    <div id="wd-usdt-preview" class="text-base font-bold num text-[#34B37E] mt-0.5">${fmtNum(state.withdrawDraft.amount, 2)} USDT</div>
                     <div class="text-[10px] text-[#A5A79B] mt-0.5">Nhận trực tiếp bằng USDT, không quy đổi VNĐ</div>
                   </div>
                   `}
@@ -1020,7 +1029,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                       return `
                       <div class="p-4 text-xs space-y-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="font-bold num text-[#E8D2B5]">${w.method === 'BANK' ? fmtUsd(amtUsd) + ' (' + Math.round(amtVnd).toLocaleString('vi-VN') + ' VNĐ)' : amtUsd.toFixed(2) + ' USDT (BSC20)'}</span>
+                          <span class="font-bold num text-[#E8D2B5]">${w.method === 'BANK' ? fmtUsd(amtUsd) + ' (' + Math.round(amtVnd).toLocaleString('vi-VN') + ' VNĐ)' : fmtNum(amtUsd, 2) + ' USDT (BSC20)'}</span>
                           <span class="text-[10px] px-2 py-0.5 rounded ${st.cls}">${escapeHtml(st.text)}</span>
                         </div>
                         <div class="text-[#A5A79B] break-all">${w.method === 'BSC20' ? 'BSC20: ' + escapeHtml(target) : escapeHtml(target)}</div>
@@ -1301,9 +1310,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                           <span class="text-[10px] num text-[#A5A79B]">${escapeHtml(p.margin_type)} · ${p.leverage}x</span>
                           ${p.breakeven_moved ? '<span class="text-[10px] px-2 py-0.5 rounded bg-[#590907] text-[#E8D2B5]">SL Hòa vốn</span>' : ''}
                         </div>
-                        <div class="num text-[#A5A79B]">Vào: ${escapeHtml(p.entry_price)} · KL: ${escapeHtml(p.quantity)} · SL: ${escapeHtml(p.stop_loss_price)} · TP: ${escapeHtml(p.take_profit_price)}</div>
+                        <div class="num text-[#A5A79B]">Vào: ${escapeHtml(fmtNum(p.entry_price))} · KL: ${escapeHtml(fmtNum(p.quantity))} · SL: ${escapeHtml(fmtNum(p.stop_loss_price))} · TP: ${escapeHtml(fmtNum(p.take_profit_price))}</div>
                       </div>
-                      <div class="num font-bold text-sm ${upnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">${upnl >= 0 ? '+' : ''}${fmtUsd(upnl)}</div>
+                      <div class="num font-bold text-sm ${upnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">${upnl > 0 ? '+' : ''}${fmtUsd(upnl, 4)}</div>
                     </div>
                   `;
                   }).join('')}
@@ -1580,7 +1589,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${st.cls}">${st.label}</span>
                             <span class="text-[10px] px-2 py-0.5 rounded panel-inset text-[#A5A79B]">${escapeHtml(profile)}</span>
                           </div>
-                          <div class="text-xs num text-[#A5A79B]">${escapeHtml(mType)} · ${lMode === 'EXCHANGE_MAX' ? 'Tối đa sàn' : c.leverage + 'x'} · Vốn $${escapeHtml(marginAmt)} · SL ${escapeHtml(sl)}% · TP ${escapeHtml(tp)}%</div>
+                          <div class="text-xs num text-[#A5A79B]">${escapeHtml(mType)} · ${lMode === 'EXCHANGE_MAX' ? 'Tối đa sàn' : c.leverage + 'x'} · Vốn $${escapeHtml(fmtNum(marginAmt, 4))} · SL ${escapeHtml(fmtNum(sl, 4))}% · TP ${escapeHtml(fmtNum(tp, 4))}%</div>
                           ${c.last_error ? `<div class="text-[11px] text-[#D64545]">${escapeHtml(c.last_error)}</div>` : ''}
                         </div>
                         <button type="button" onclick="toggleConfigStatus(${toggleArg})" class="px-4 py-1.5 text-xs font-semibold rounded-lg shrink-0 ${c.status === 'RUNNING' ? 'border border-[#D64545]/45 text-[#D64545]' : 'btn-champagne'}">
@@ -1634,11 +1643,11 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                           <span class="text-[10px] font-bold px-2 py-0.5 rounded ${t.side === 'LONG' ? 'bg-[#34B37E]/15 text-[#34B37E]' : 'bg-[#D64545]/15 text-[#D64545]'}">${escapeHtml(t.side)}</span>
                           <span class="text-[10px] text-[#A5A79B]">${escapeHtml(t.close_reason)} · ${escapeHtml(fmtDateTime(t.executed_at))}</span>
                         </div>
-                        <div class="num text-[#A5A79B]">Vào: ${escapeHtml(t.entry_price)} → Ra: ${escapeHtml(t.exit_price)} · KL: ${escapeHtml(t.quantity)} · Phí sàn: ${fmtUsd(t.exchange_fee || 0)}</div>
+                        <div class="num text-[#A5A79B]">Vào: ${escapeHtml(fmtNum(t.entry_price))} → Ra: ${escapeHtml(fmtNum(t.exit_price))} · KL: ${escapeHtml(fmtNum(t.quantity))} · Phí sàn: ${fmtUsd(t.exchange_fee || 0, 4)}</div>
                       </div>
                       <div class="text-left sm:text-right num">
-                        <div class="font-bold text-sm ${pnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">${pnl >= 0 ? '+' : '-'}${fmtUsd(Math.abs(pnl))}</div>
-                        <div class="text-[11px] text-[#A5A79B]">Phí HWM: ${fmtUsd(hwmFee)}</div>
+                        <div class="font-bold text-sm ${pnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">${pnl > 0 ? '+' : ''}${fmtUsd(pnl, 4)}</div>
+                        <div class="text-[11px] text-[#A5A79B]">Phí HWM: ${fmtUsd(hwmFee, 4)}</div>
                       </div>
                     </div>
                   `;
@@ -1729,7 +1738,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 ` : `
                 <div class="space-y-1.5 text-xs">
                   <div>Mã đơn nạp USDT BEP20: <code class="px-2 py-0.5 rounded bg-[#590907] text-[#E8D2B5] num font-bold">${escapeHtml(pd.order_code)}</code></div>
-                  <div>Số lượng: <strong class="num text-[#34B37E]">${escapeHtml(pd.pay_amount)} ${escapeHtml(pd.pay_currency)}</strong></div>
+                  <div>Số lượng: <strong class="num text-[#34B37E]">${escapeHtml(fmtNum(pd.pay_amount, 4))} ${escapeHtml(pd.pay_currency)}</strong></div>
                   <div class="text-[11px] text-[#A5A79B]">Trạng thái: ${escapeHtml(pd.status)}. Credit sẽ tự động cộng sau khi NOWPayments xác nhận giao dịch trên mạng BSC20.</div>
                 </div>
                 `}
@@ -2077,7 +2086,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       const el = document.getElementById('wd-vnd-preview');
       if (el) el.textContent = Math.round(n * state.vndRate).toLocaleString('vi-VN') + ' VNĐ';
       const uEl = document.getElementById('wd-usdt-preview');
-      if (uEl) uEl.textContent = Number(n).toFixed(2) + ' USDT';
+      if (uEl) uEl.textContent = fmtNum(n, 2) + ' USDT';
     };
     window.setEarnField = (key, val) => {
       state.earnCalc[key] = val;

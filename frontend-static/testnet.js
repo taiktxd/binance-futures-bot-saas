@@ -27,6 +27,19 @@ let token = '';
 let api;
 let busy = false;
 
+function fmtNum(val, maxDp = 8) {
+  const n = Number(val);
+  if (!Number.isFinite(n)) return String(val ?? '');
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: maxDp });
+}
+
+function fmtSigned(val, maxDp = 4) {
+  const n = Number(val);
+  if (!Number.isFinite(n)) return String(val ?? '');
+  const prefix = n > 0 ? '+' : '';
+  return prefix + fmtNum(n, maxDp);
+}
+
 function renderList(id, rows, describe, actions = {}) {
   const list = $(id);
   list.replaceChildren();
@@ -59,7 +72,7 @@ async function refresh() {
   renderList('keys', testKeys, key => key.label + ' · ' + key.api_key_masked, {
     'Kiểm tra': async key => {
       const result = await api('/api-keys/' + key.id + '/test', 'POST');
-      return 'Kết nối Testnet thành công. Số dư khả dụng ' + result.available_usdt_balance + ' USDT.';
+      return 'Kết nối Testnet thành công. Số dư khả dụng ' + fmtNum(result.available_usdt_balance, 4) + ' USDT.';
     }
   });
   renderList('bots', testBots, bot => [bot.symbol, bot.risk_profile, bot.status, bot.last_error].filter(Boolean).join(' · '), {
@@ -68,18 +81,18 @@ async function refresh() {
     'Vào LONG ngay (Test)': async bot => {
       const pos = await api('/admin/bots/' + bot.id + '/test-order', 'POST', { side: 'LONG' });
       await refresh();
-      return `Đã vào lệnh LONG ${pos.symbol}: KL ${pos.quantity} @ ${pos.entry_price} · SL ${pos.stop_loss_price} · TP ${pos.take_profit_price}`;
+      return `Đã vào lệnh LONG ${pos.symbol}: KL ${fmtNum(pos.quantity)} @ ${fmtNum(pos.entry_price)} · SL ${fmtNum(pos.stop_loss_price)} · TP ${fmtNum(pos.take_profit_price)}`;
     },
     'Vào SHORT ngay (Test)': async bot => {
       const pos = await api('/admin/bots/' + bot.id + '/test-order', 'POST', { side: 'SHORT' });
       await refresh();
-      return `Đã vào lệnh SHORT ${pos.symbol}: KL ${pos.quantity} @ ${pos.entry_price} · SL ${pos.stop_loss_price} · TP ${pos.take_profit_price}`;
+      return `Đã vào lệnh SHORT ${pos.symbol}: KL ${fmtNum(pos.quantity)} @ ${fmtNum(pos.entry_price)} · SL ${fmtNum(pos.stop_loss_price)} · TP ${fmtNum(pos.take_profit_price)}`;
     }
   });
   renderList('positions', positions.filter(row => botIds.has(row.bot_config_id)),
-    row => [row.symbol, row.side, row.quantity, 'Giá vào ' + row.entry_price, 'PnL ' + row.unrealized_pnl].join(' · '));
+    row => [row.symbol, row.side, fmtNum(row.quantity), 'Giá vào ' + fmtNum(row.entry_price), 'SL ' + fmtNum(row.stop_loss_price), 'TP ' + fmtNum(row.take_profit_price), 'PnL ' + fmtSigned(row.unrealized_pnl, 4) + ' USDT'].join(' · '));
   renderList('trades', trades.filter(row => botIds.has(row.bot_config_id)),
-    row => [row.symbol, row.side, 'Giá thoát ' + row.exit_price, 'PnL ' + row.realized_pnl].join(' · '));
+    row => [row.symbol, row.side, 'Giá thoát ' + fmtNum(row.exit_price), 'PnL ' + fmtSigned(row.realized_pnl, 4) + ' USDT'].join(' · '));
 }
 
 async function run(action) {
@@ -105,7 +118,7 @@ function onSubmit(form, action) {
 }
 
 try {
-  if (!window.EXTREME_CONFIG?.API_URL) throw new Error('Chưa cấu hình API_URL trong config.js.');
+  if (!window.EXTREME_CONFIG?.API_URL) throw new Error('Chưa cấu hình API_URL (link HTTPS của máy chủ bot VPS) trong config.js. Nếu đang test trên máy cá nhân, hãy mở http://localhost:5173/testnet.html.');
   api = createApi(window.EXTREME_CONFIG.API_URL, () => token);
   login.hidden = false;
   onSubmit(login, async fields => {
