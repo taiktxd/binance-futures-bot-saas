@@ -1,0 +1,99 @@
+name: Build Rust Backend Release (Linux x86_64)
+
+# Tuyệt đối KHÔNG chạy `cargo build` trên VPS 1 vCPU / 2GB RAM.
+# Workflow này biên dịch sẵn binary `--release` trên GitHub Runners và xuất artifact.
+
+on:
+  push:
+    branches: ["main", "develop"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/build.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+    inputs:
+      deploy_vps:
+        description: Deploy the verified binary to the configured VPS
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  SQLX_OFFLINE: "true"
+
+jobs:
+  check-test-build:
+    name: Check, Test & Build Release Binary
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo registry & build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: Verify code formatting (rustfmt)
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy linter
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
+      - name: Run unit tests (HWM Decimal & AES-256-GCM)
+        run: cargo test --locked --workspace
+
+      - name: Build optimized Linux x86_64 release binary
+        run: cargo build --locked --release --bin bot-server
+
+      - name: Verify binary size & dynamic dependencies
+        run: |
+          ls -lh target/release/bot-server
+          ldd target/release/bot-server || true
+
+      - name: Upload release binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-server-linux-x86_64
+          path: backend/target/release/bot-server
+          retention-days: 14
+
+  # Optional: Kích hoạt ở Phase 6 khi đã cấu hình GitHub Secrets (VPS_HOST, VPS_USER, VPS_SSH_KEY)
+  deploy-vps:
+    name: Deploy Binary to Ubuntu VPS (Optional)
+    needs: check-test-build
+    runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy_vps
+    steps:
+      - name: Download built binary
+        uses: actions/download-artifact@v4
+        with:
+          name: bot-server-linux-x86_64
+          path: dist
+
+      - name: Copy binary to VPS & restart systemd service
+        if: env.VPS_HOST != ''
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          scp dist/bot-server "$VPS_USER@$VPS_HOST:/opt/bot-futures/bot-server.new"
+          ssh "$VPS_USER@$VPS_HOST" "chmod +x /opt/bot-futures/bot-server.new && mv /opt/bot-futures/bot-server.new /opt/bot-futures/bot-server && sudo systemctl restart bot-engine.service"

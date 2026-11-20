@@ -1,0 +1,83 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/common",
+    "crates/binance",
+    "crates/engine",
+    "crates/api",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Futures Bot SaaS Team"]
+license = "PROPRIETARY"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.40", features = ["full"] }
+futures-util = "0.3"
+
+# Web framework & middleware
+axum = { version = "0.7", features = ["ws", "macros"] }
+tower = "0.5"
+tower-http = { version = "0.5", features = ["cors", "trace", "compression-gzip"] }
+
+# Database (PostgreSQL / Supabase)
+sqlx = { version = "0.8", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "postgres",
+    "uuid",
+    "chrono",
+    "rust_decimal",
+    "json",
+] }
+
+# Financial math (STRICT: NEVER use f64 for balances, PnL, fees, or quantities)
+rust_decimal = { version = "1.36", features = ["serde-with-str", "maths"] }
+rust_decimal_macros = "1.36"
+
+# Technical indicators (EMA, RSI, ATR, Bollinger Bands)
+ta = "0.5"
+
+# HTTP & WebSocket client (Binance Futures & Telegram)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+url = "2.5"
+
+# Cryptography & Auth
+aes-gcm = "0.10"
+argon2 = "0.5"
+jsonwebtoken = "9.3"
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+rand = "0.8"
+
+# Serialization & Types
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Config, Error handling & Observability
+dotenvy = "0.15"
+thiserror = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Internal workspace crates
+common = { path = "crates/common" }
+binance = { path = "crates/binance" }
+engine = { path = "crates/engine" }
+
+[profile.release]
+# Optimize binary size and memory footprint for 1 vCPU / 2GB RAM VPS
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"
