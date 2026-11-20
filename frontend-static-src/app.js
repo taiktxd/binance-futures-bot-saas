@@ -32,6 +32,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         high_water_mark: Number(raw.high_water_mark ?? raw.hwm ?? 0),
         bonus_claimed: Boolean(raw.bonus_credit_granted ?? raw.bonus_claimed ?? false),
         ref_code: raw.referral_code || raw.ref_code || '',
+        has_referrer: Boolean(raw.referred_by_user_id || raw.has_referrer),
       };
     }
 
@@ -796,7 +797,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 <div class="text-[11px] font-semibold tracking-widest uppercase text-[#E8D2B5]/75">CHƯƠNG TRÌNH ĐỐI TÁC &amp; KIẾM TIỀN <span class="extreme-run">EXTREME</span></div>
                 <h1 class="text-xl sm:text-2xl font-bold text-[#E8D2B5]">Xây dựng dòng thu nhập thụ động 2 tầng trọn đời từ phí gói tháng &amp; lợi nhuận HWM</h1>
                 <p class="text-xs sm:text-sm text-[#E8D2B5]/80">
-                  Mỗi khách hàng bạn giới thiệu khi nạp kích hoạt tối thiểu $1.00 trở lên sẽ được gắn vĩnh viễn vào hệ thống của bạn. Nhận đồng thời hoa hồng gói tháng, chia sẻ phí HWM trọn đời và quỹ thưởng đua Top hàng tháng.
+                  Mỗi khách hàng nhập mã của bạn khi đăng ký sẽ được <strong class="text-[#34B37E]">nhân đôi thưởng khởi đầu lên $10.00 Credit</strong> (khi nạp từ $1.00) và <strong class="text-[#E8D2B5]">giảm 10% gói tháng đầu</strong>. Bạn nhận hoa hồng gói tháng, chia sẻ phí HWM trọn đời 2 tầng và quỹ thưởng Top Leader.
                 </p>
               </div>
               <div class="panel-inset rounded-lg p-4 space-y-2 shrink-0 min-w-[260px]">
@@ -1202,6 +1203,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
           const hwm = sum ? Number(sum.high_water_mark) : (state.user ? state.user.high_water_mark : 0.0);
           const cumPnl = sum ? Number(sum.cumulative_net_pnl) : (state.user ? state.user.cumulative_net_pnl : 0.0);
           const bonusClaimed = state.user ? Boolean(state.user.bonus_claimed) : false;
+          const hasReferrer = Boolean(state.user?.has_referrer);
+          const bonusUsd = hasReferrer ? 10 : 5;
+          const totalWithOne = bonusUsd + 1;
           const activeCount = sum ? Number(sum.active_bots_count) : state.configs.filter((c) => c.status === 'RUNNING').length;
           const openPositions = Array.isArray(sum?.open_positions) ? sum.open_positions : [];
           const wsLiveLabel = sum ? (sum.ws_feed_connected ? 'TRỰC TIẾP' : 'ĐANG KẾT NỐI') : 'TRỰC TIẾP';
@@ -1213,10 +1217,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
               ${!bonusClaimed ? `
               <div class="panel-wine rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <div class="text-xs font-bold text-[#E8D2B5]">Kích hoạt thưởng $5.00 Credit cho tài khoản mới</div>
-                  <div class="text-xs text-[#E8D2B5]/80 mt-0.5">Nạp lần đầu tối thiểu $1.00 để xác thực tài khoản thật và nhận ngay $5.00 khuyến mãi (tổng $6.00 Credit).</div>
+                  <div class="text-xs font-bold text-[#E8D2B5]">Kích hoạt thưởng $${bonusUsd}.00 Credit${hasReferrer ? ' (Nhân đôi qua mã giới thiệu)' : ' cho tài khoản mới'}</div>
+                  <div class="text-xs text-[#E8D2B5]/80 mt-0.5">Nạp lần đầu tối thiểu $1.00 để xác thực tài khoản thật và nhận ngay $${bonusUsd}.00 khuyến mãi (tổng $${totalWithOne}.00 Credit)${hasReferrer ? ' + giảm 10% gói tháng đầu' : ''}.</div>
                 </div>
-                <button type="button" onclick="navigate('wallet')" class="btn-champagne px-4 py-2 text-xs font-bold rounded-lg shrink-0">Nạp $1 nhận $5</button>
+                <button type="button" onclick="navigate('wallet')" class="btn-champagne px-4 py-2 text-xs font-bold rounded-lg shrink-0">Nạp $1 nhận $${bonusUsd}</button>
               </div>
               ` : ''}
 
@@ -1224,7 +1228,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 <div class="panel-wine rounded-xl p-4">
                   <div class="text-xs text-[#E8D2B5]/75">Số dư Ví Credit</div>
                   <div class="mt-1.5 text-2xl font-bold num text-[#E8D2B5]">${fmtUsd(credit)}</div>
-                  <div class="mt-1 text-[11px] text-[#E8D2B5]/70">${bonusClaimed ? 'Đã nhận thưởng $5.00' : 'Nạp tối thiểu $1 để nhận $5'}</div>
+                  <div class="mt-1 text-[11px] text-[#E8D2B5]/70">${bonusClaimed ? `Đã nhận thưởng $${bonusUsd}.00` : `Nạp tối thiểu $1 để nhận $${bonusUsd}`}</div>
                 </div>
                 <div class="panel rounded-xl p-4">
                   <div class="text-xs text-[#A5A79B]">Gói hiện tại</div>
@@ -1653,6 +1657,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         } else {
           const credit = state.user ? state.user.credit_balance : 0.0;
           const bonusClaimed = state.user ? Boolean(state.user.bonus_claimed) : false;
+          const hasReferrer = Boolean(state.user?.has_referrer);
+          const bonusUsd = hasReferrer ? 10 : 5;
+          const hasPriorSub = state.creditTxs.some((tx) => tx.tx_type === 'SUBSCRIPTION_FEE' || tx.is_sub_fee);
+          const firstSubDiscount = hasReferrer && !hasPriorSub;
+          const stdLabel = firstSubDiscount ? '$26.10/tháng (-10%)' : '$29/tháng';
+          const proLabel = firstSubDiscount ? '$71.10/tháng (-10%)' : '$79/tháng';
           const pd = state.pendingDeposit;
           root.innerHTML = `
             <div class="space-y-5">
@@ -1663,12 +1673,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                   <div class="flex items-center justify-between">
                     <div class="text-xs text-[#A5A79B]">Ví Credit (Trừ phí 20% HWM)</div>
                     <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${bonusClaimed ? 'bg-[#34B37E]/15 text-[#34B37E]' : 'bg-[#590907] text-[#E8D2B5]'}">
-                      ${bonusClaimed ? 'Đã nhận $5 thưởng' : 'Nạp tối thiểu $1 nhận $5'}
+                      ${bonusClaimed ? `Đã nhận $${bonusUsd} thưởng` : `Nạp tối thiểu $1 nhận $${bonusUsd}`}
                     </span>
                   </div>
                   <div class="text-2xl font-bold num text-[#E8D2B5]">${fmtUsd(credit)}</div>
                   <p class="text-xs text-[#A5A79B] leading-relaxed">
-                    Nguyên tắc chống spam: tài khoản mới cần nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> để hệ thống tự động cộng thêm <strong class="text-[#34B37E]">$5.00 khuyến mãi</strong> (1 lần duy nhất mỗi tài khoản).
+                    Nguyên tắc chống spam: tài khoản mới cần nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> để hệ thống tự động cộng thêm <strong class="text-[#34B37E]">$${bonusUsd}.00 khuyến mãi</strong>${hasReferrer ? ' (đã nhân đôi nhờ mã giới thiệu)' : ' (nhập mã giới thiệu lúc đăng ký được nhân đôi lên $10.00)'} — chỉ dùng trừ phí HWM, không rút tiền mặt.
                   </p>
                   <div class="flex flex-wrap items-end gap-2 pt-1">
                     <div class="flex-1 min-w-[120px]">
@@ -1681,13 +1691,16 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 </div>
 
                 <div class="panel-wine rounded-xl p-5 space-y-3">
-                  <div class="text-xs text-[#E8D2B5]/75">Gói thuê bao tháng</div>
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="text-xs text-[#E8D2B5]/75">Gói thuê bao tháng</div>
+                    ${firstSubDiscount ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#34B37E]/25 text-[#34B37E]">GIẢM 10% THÁNG ĐẦU</span>' : ''}
+                  </div>
                   <div class="text-2xl font-bold text-[#E8D2B5]">${escapeHtml(planLabel(state.user?.plan, state.user?.role))}</div>
                   ${state.user?.plan_expires_at ? `<div class="text-[11px] num text-[#E8D2B5]/80">Hiệu lực đến: ${escapeHtml(fmtDateTime(state.user.plan_expires_at))}</div>` : ''}
-                  <p class="text-xs text-[#E8D2B5]/80 leading-relaxed">Nâng cấp Gói Tiêu chuẩn ($29/tháng) hoặc Chuyên nghiệp ($79/tháng) bằng Ví Credit để mở toàn bộ 3 cặp giao dịch không giới hạn.</p>
+                  <p class="text-xs text-[#E8D2B5]/80 leading-relaxed">${firstSubDiscount ? 'Ưu đãi mã giới thiệu: giảm ngay 10% cho tháng đầu tiên — Gói Tiêu chuẩn còn $26.10 (gốc $29), Gói Chuyên nghiệp còn $71.10 (gốc $79).' : 'Nâng cấp Gói Tiêu chuẩn ($29/tháng) hoặc Chuyên nghiệp ($79/tháng) bằng Ví Credit để mở toàn bộ 3 cặp giao dịch không giới hạn.'}</p>
                   <div class="flex flex-wrap gap-2 pt-1">
-                    <button type="button" onclick="subscribePlan('STANDARD')" class="btn-champagne px-4 py-2 text-xs font-bold rounded-lg">Chọn gói $29/tháng</button>
-                    <button type="button" onclick="subscribePlan('PRO')" class="btn-stone px-4 py-2 text-xs font-semibold rounded-lg">Chọn gói $79/tháng</button>
+                    <button type="button" onclick="subscribePlan('STANDARD')" class="btn-champagne px-4 py-2 text-xs font-bold rounded-lg">Chọn gói ${stdLabel}</button>
+                    <button type="button" onclick="subscribePlan('PRO')" class="btn-stone px-4 py-2 text-xs font-semibold rounded-lg">Chọn gói ${proLabel}</button>
                   </div>
                 </div>
               </div>
@@ -1873,9 +1886,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
           <div class="max-w-md mx-auto mt-6 panel rounded-xl p-6 space-y-4">
             <div class="flex items-center justify-between border-b border-[#A5A79B]/20 pb-3">
               <h1 class="text-base font-bold text-[#E8D2B5]">${isReg ? 'Tạo tài khoản EXTREME' : 'Đăng nhập EXTREME'}</h1>
-              <span class="text-[11px] font-semibold num text-[#34B37E]">${isReg ? 'Nạp $1 tặng $5' : ''}</span>
+              <span id="reg-perk-pill" class="text-[11px] font-semibold num text-[#34B37E]">${isReg ? (savedRef ? 'Nạp $1 tặng $10 + Giảm 10%' : 'Nạp $1 tặng đến $10') : ''}</span>
             </div>
-            ${isReg ? `<div class="p-3 text-xs rounded-lg panel-inset text-[#A5A79B]">Tài khoản mới khởi tạo với $0.00 Credit. Nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> để nhận ngay <strong class="text-[#34B37E]">$5.00 khuyến mãi</strong>.</div>` : ''}
+            ${isReg ? `<div class="p-3 text-xs rounded-lg panel-inset text-[#A5A79B]">Tài khoản mới khởi tạo với $0.00 Credit. Nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> nhận ngay <strong class="text-[#34B37E]">$5.00</strong> — hoặc <strong class="text-[#34B37E]">$10.00 Credit + giảm 10% gói tháng đầu</strong> khi có mã giới thiệu.</div>` : ''}
             <div id="auth-msg" class="hidden p-3 text-xs rounded-lg"></div>
             <form id="auth-form" class="space-y-3.5">
               <div>
@@ -1887,9 +1900,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 <input id="auth-pass" type="password" minlength="8" required class="w-full px-3.5 py-2.5 text-xs panel-inset rounded-lg text-[#E8D2B5] focus:outline-none focus:border-[#E8D2B5]" />
               </div>
               ${isReg ? `
-              <div>
-                <label class="block text-xs text-[#A5A79B] mb-1">Mã giới thiệu đối tác (tùy chọn)</label>
-                <input id="auth-ref" type="text" value="${escapeHtml(savedRef)}" placeholder="VD: EX-XXXXXX" class="w-full px-3.5 py-2.5 text-xs num uppercase panel-inset rounded-lg text-[#E8D2B5] focus:outline-none focus:border-[#E8D2B5]" />
+              <div class="p-3 rounded-lg border border-[#34B37E]/30 bg-[#34B37E]/8 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <label class="text-xs font-semibold text-[#E8D2B5]">Mã giới thiệu đối tác</label>
+                  <span id="ref-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded ${savedRef ? 'bg-[#34B37E]/25 text-[#34B37E]' : 'bg-[#590907] text-[#E8D2B5]'}">${savedRef ? 'Đã áp dụng ưu đãi x2' : '+$5 Credit · -10% gói đầu'}</span>
+                </div>
+                <input id="auth-ref" type="text" value="${escapeHtml(savedRef)}" placeholder="VD: EX-XXXXXX" oninput="updateRefPerkHint(this.value)" class="w-full px-3.5 py-2 text-xs num uppercase panel-inset rounded-lg text-[#E8D2B5] focus:outline-none focus:border-[#34B37E]" />
+                <p class="text-[11px] text-[#A5A79B] leading-relaxed">
+                  Nhập mã giới thiệu để <strong class="text-[#34B37E]">nhân đôi thưởng khởi đầu lên $10.00 Credit</strong> (khi nạp đầu từ $1) + <strong class="text-[#E8D2B5]">giảm 10% gói tháng đầu</strong> ($26.10 Standard / $71.10 Pro).
+                </p>
               </div>
               ` : ''}
               <button type="submit" class="btn-champagne w-full py-2.5 text-xs font-bold rounded-lg">
@@ -1941,6 +1960,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 plan: 'INACTIVE',
                 credit_balance: 0.0,
                 bonus_claimed: false,
+                has_referrer: Boolean(refCode),
                 hwm: 0.0,
                 ref_code: 'EX-' + Math.random().toString(36).slice(2, 7).toUpperCase(),
               });
@@ -2121,10 +2141,17 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       state.creditTxs.unshift({ title: `Nạp Credit qua ${method}`, amount: amt, time: nowStr });
 
       if (!state.user.bonus_claimed && amt >= 1) {
+        const bonusVal = state.user.has_referrer ? 10.0 : 5.0;
         state.user.bonus_claimed = true;
         state.user.plan = 'TRIAL';
-        state.user.credit_balance = Number((state.user.credit_balance + 5.0).toFixed(2));
-        state.creditTxs.unshift({ title: 'Khuyến mãi kích hoạt lần đầu (Nạp tối thiểu $1)', amount: 5.0, time: nowStr });
+        state.user.credit_balance = Number((state.user.credit_balance + bonusVal).toFixed(2));
+        state.creditTxs.unshift({
+          title: state.user.has_referrer
+            ? 'Thưởng nạp đầu nhân đôi ($10 Credit qua mã giới thiệu)'
+            : 'Khuyến mãi kích hoạt lần đầu (Nạp tối thiểu $1)',
+          amount: bonusVal,
+          time: nowStr,
+        });
       }
 
       const idx = state.usersDb.findIndex((u) => u.email === state.user.email);
@@ -2160,23 +2187,39 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         }
         return;
       }
-      const price = plan === 'PRO' ? 79 : 29;
+      const basePrice = plan === 'PRO' ? 79 : 29;
+      const isFirstSub = !state.creditTxs.some((tx) => tx.tx_type === 'SUBSCRIPTION_FEE' || tx.is_sub_fee);
+      const discounted = Boolean(state.user.has_referrer) && isFirstSub;
+      const price = discounted ? Number((basePrice * 0.9).toFixed(2)) : basePrice;
       if (state.user.credit_balance < price) {
-        setNotice('error', `Số dư Ví Credit không đủ ($${price}.00). Vui lòng nạp thêm Credit trước.`);
+        setNotice('error', `Số dư Ví Credit không đủ (${fmtUsd(price)}). Vui lòng nạp thêm Credit trước.`);
         renderView();
         return;
       }
       state.user.credit_balance = Number((state.user.credit_balance - price).toFixed(2));
       state.user.plan = plan;
       state.creditTxs.unshift({
-        title: `Đăng ký gói ${planLabel(plan, 'USER')}`,
+        title: `Đăng ký gói ${planLabel(plan, 'USER')}${discounted ? ' (-10% mã giới thiệu)' : ''}`,
         amount: -price,
+        is_sub_fee: true,
         time: new Date().toLocaleString('vi-VN'),
       });
       localStorage.setItem('ex_user', JSON.stringify(state.user));
       localStorage.setItem('ex_credit_txs', JSON.stringify(state.creditTxs));
-      setNotice('success', `Đã kích hoạt gói ${planLabel(plan, 'USER')}.`);
+      setNotice('success', `Đã kích hoạt gói ${planLabel(plan, 'USER')}${discounted ? ' với ưu đãi giảm 10% tháng đầu' : ''}.`);
       renderView();
+    };
+    window.updateRefPerkHint = (val) => {
+      const hasVal = Boolean((val || '').trim());
+      const badge = document.getElementById('ref-status-badge');
+      const pill = document.getElementById('reg-perk-pill');
+      if (badge) {
+        badge.textContent = hasVal ? 'Đã áp dụng ưu đãi x2' : '+$5 Credit · -10% gói đầu';
+        badge.className = `text-[10px] font-bold px-2 py-0.5 rounded ${hasVal ? 'bg-[#34B37E]/25 text-[#34B37E]' : 'bg-[#590907] text-[#E8D2B5]'}`;
+      }
+      if (pill) {
+        pill.textContent = hasVal ? 'Nạp $1 tặng $10 + Giảm 10%' : 'Nạp $1 tặng đến $10';
+      }
     };
     window.setCustomLeverage = (val) => {
       const parsed = parseInt(val, 10);

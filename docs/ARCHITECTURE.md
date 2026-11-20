@@ -4,7 +4,7 @@
 
 > **Thương hiệu & Bảng màu bắt buộc:** **EXTREME** — 3 màu chủ đạo `#590907` (Oxblood), `#E8D2B5` (Champagne), `#A5A79B` (Sage Stone) trên nền trầm dịu mắt `#110E0E`, font `Be Vietnam Pro` + `JetBrains Mono` (`tabular-nums`), sử dụng nguyên bản `/frontend-static/logo.png` và hiệu ứng chữ `EXTREME` chạy.
 > **Phạm vi giao dịch:** Chỉ **Binance USDⓈ-M Futures** với 3 tài sản whitelist cứng: `BTCUSDT`, `ETHUSDT`, `XAUUSDT` (fallback `PAXGUSDT` trên Testnet Admin).
-> **Mô hình kinh doanh:** Gói thuê bao tháng (`TRIAL`, `STANDARD $29`, `PRO $79`) + **20% High-Water Mark (HWM)** trừ vào Ví Credit. Chống spam: tài khoản mới khởi tạo `$0.00` Credit, nạp lần đầu tối thiểu **`$1.00`** sẽ tự động thưởng **`$5.00`** Credit (1 lần duy nhất).
+> **Mô hình kinh doanh:** Gói thuê bao tháng (`TRIAL`, `STANDARD $29`, `PRO $79`) + **20% High-Water Mark (HWM)** trừ vào Ví Credit. Chống spam: tài khoản mới khởi tạo `$0.00` Credit, nạp lần đầu tối thiểu **`$1.00`** tự động thưởng **`$5.00`** Credit (hoặc **`$10.00`** Credit — gấp đôi — kèm **giảm 10% gói thuê bao tháng đầu tiên** còn `$26.10`/`$71.10` nếu đăng ký qua mã giới thiệu đối tác).
 > **Hạ tầng mục tiêu:** VPS Linux Ubuntu 22.04/24.04 (1 vCPU / 2GB RAM / 1 IP tĩnh) + Supabase PostgreSQL Free Tier + Cloudflare Pages.
 
 ---

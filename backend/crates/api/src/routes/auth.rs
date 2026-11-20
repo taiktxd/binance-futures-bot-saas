@@ -48,11 +48,23 @@ pub async fn register(
         .map_err(|e| AppError::Internal(format!("password hashing failed: {e}")))?
         .to_string();
 
-    let referrer_id: Option<Uuid> = if let Some(ref_code) = payload.referral_code.as_deref() {
-        sqlx::query_scalar("SELECT id FROM users WHERE referral_code = $1")
-            .bind(ref_code.trim().to_uppercase())
-            .fetch_optional(&state.pool)
-            .await?
+    let referrer_id: Option<Uuid> = if let Some(ref_code) = payload
+        .referral_code
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+    {
+        let found: Option<Uuid> =
+            sqlx::query_scalar("SELECT id FROM users WHERE referral_code = $1")
+                .bind(ref_code.to_uppercase())
+                .fetch_optional(&state.pool)
+                .await?;
+        let Some(id) = found else {
+            return Err(ApiError(AppError::Validation(
+                "mã giới thiệu không tồn tại, vui lòng kiểm tra lại hoặc để trống".to_string(),
+            )));
+        };
+        Some(id)
     } else {
         None
     };
@@ -87,13 +99,20 @@ pub async fn register(
         }
     })?;
 
+    let welcome_body = if referrer_id.is_some() {
+        "Ưu đãi mã giới thiệu đã được gắn: Nạp lần đầu tối thiểu $1.00 để nhận ngay $10.00 Credit thưởng (gấp đôi) + giảm 10% gói thuê bao tháng đầu."
+    } else {
+        "Nạp lần đầu tối thiểu $1.00 để kích hoạt khuyến mãi $5.00 Credit."
+    };
+
     let _ = sqlx::query(
         r#"
         INSERT INTO notifications (user_id, title, body)
-        VALUES ($1, 'Chào mừng đến với EXTREME', 'Nạp lần đầu tối thiểu $1.00 để kích hoạt khuyến mãi $5.00 Credit.')
+        VALUES ($1, 'Chào mừng đến với EXTREME', $2)
         "#,
     )
     .bind(user.id)
+    .bind(welcome_body)
     .execute(&state.pool)
     .await;
 

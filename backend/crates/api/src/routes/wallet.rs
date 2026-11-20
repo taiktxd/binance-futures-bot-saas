@@ -3,10 +3,10 @@ use crate::state::{ApiError, ApiResult, AppState};
 use axum::{extract::State, http::HeaderMap, Json};
 use chrono::{DateTime, Duration, Utc};
 use common::{
-    f1_hwm_commission_rate, f1_subscription_commission_rate, partner_tier_name,
-    subscription_plan_price_usd, AppError, CreditTransactionRecord, CreditTxType,
-    DepositOrderRecord, NotificationRecord, SubscriptionPlan, UserRecord, WithdrawMethod,
-    WithdrawRequestRecord, F2_HWM_COMMISSION_RATE,
+    f1_hwm_commission_rate, f1_subscription_commission_rate, first_deposit_bonus_usd,
+    partner_tier_name, subscription_checkout_price_usd, subscription_plan_price_usd, AppError,
+    CreditTransactionRecord, CreditTxType, DepositOrderRecord, NotificationRecord,
+    SubscriptionPlan, UserRecord, WithdrawMethod, WithdrawRequestRecord, F2_HWM_COMMISSION_RATE,
 };
 use hmac::{Hmac, Mac};
 use rust_decimal::Decimal;
@@ -169,7 +169,7 @@ pub async fn subscribe_plan(
     auth: AuthUser,
     Json(payload): Json<SubscribePlanRequest>,
 ) -> ApiResult<Json<UserRecord>> {
-    let price = subscription_plan_price_usd(payload.plan).ok_or_else(|| {
+    let list_price = subscription_plan_price_usd(payload.plan).ok_or_else(|| {
         AppError::Validation("only STANDARD ($29) or PRO ($79) plans can be subscribed".to_string())
     })?;
 
@@ -189,6 +189,19 @@ pub async fn subscribe_plan(
     let before: Decimal = row.try_get("credit_balance")?;
     let existing_expires: Option<DateTime<Utc>> = row.try_get("plan_expires_at")?;
     let referred_by_user_id: Option<Uuid> = row.try_get("referred_by_user_id")?;
+
+    let prior_sub_count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM credit_transactions WHERE user_id = $1 AND tx_type = 'SUBSCRIPTION_FEE'",
+    )
+    .bind(auth.user_id)
+    .fetch_one(&mut *tx)
+    .await?;
+
+    let has_referrer = referred_by_user_id.is_some();
+    let is_first_sub = prior_sub_count == 0;
+    let discount_applied = has_referrer && is_first_sub;
+    let price = subscription_checkout_price_usd(payload.plan, has_referrer, is_first_sub)
+        .unwrap_or(list_price);
 
     if before < price {
         return Err(ApiError(AppError::Forbidden(format!(
@@ -220,8 +233,20 @@ pub async fn subscribe_plan(
     .await?;
 
     let plan_label = match payload.plan {
-        SubscriptionPlan::Standard => "STANDARD ($29/tháng)",
-        SubscriptionPlan::Pro => "PRO ($79/tháng)",
+        SubscriptionPlan::Standard => {
+            if discount_applied {
+                "STANDARD ($26.10 — giảm 10% mã giới thiệu)"
+            } else {
+                "STANDARD ($29/tháng)"
+            }
+        }
+        SubscriptionPlan::Pro => {
+            if discount_applied {
+                "PRO ($71.10 — giảm 10% mã giới thiệu)"
+            } else {
+                "PRO ($79/tháng)"
+            }
+        }
         _ => "SUBSCRIPTION",
     };
 
@@ -240,6 +265,9 @@ pub async fn subscribe_plan(
     .bind(format!("Đăng ký gói {plan_label}"))
     .bind(serde_json::json!({
         "plan": payload.plan,
+        "list_price": list_price.to_string(),
+        "final_price": price.to_string(),
+        "referral_discount_pct": if discount_applied { 10 } else { 0 },
         "expires_at": new_expires.to_rfc3339()
     }))
     .execute(&mut *tx)
@@ -608,8 +636,9 @@ pub async fn nowpayments_webhook(
     Ok(Json(serde_json::json!({ "success": true })))
 }
 
-/// Credits user balance idempotently and grants the one-time $5.00 promotional bonus
-/// when a new account completes its first verified deposit >= $1.00.
+/// Credits user balance idempotently and grants the one-time promotional bonus
+/// when a new account completes its first verified deposit >= $1.00:
+/// $5.00 standard, or $10.00 (2x) when the account registered with a referral code.
 async fn apply_deposit_credit(
     state: &AppState,
     order_id: Uuid,
@@ -632,18 +661,20 @@ async fn apply_deposit_credit(
     }
 
     let row = sqlx::query(
-        "SELECT credit_balance, bonus_credit_granted FROM users WHERE id = $1 FOR UPDATE",
+        "SELECT credit_balance, bonus_credit_granted, referred_by_user_id FROM users WHERE id = $1 FOR UPDATE",
     )
     .bind(user_id)
     .fetch_one(&mut *tx)
     .await?;
     let before: Decimal = row.try_get("credit_balance")?;
     let bonus_granted: bool = row.try_get("bonus_credit_granted")?;
+    let referred_by_user_id: Option<Uuid> = row.try_get("referred_by_user_id")?;
 
+    let has_referrer = referred_by_user_id.is_some();
     let after_deposit = (before + credit_usd).round_dp(8);
     let grant_bonus_now = !bonus_granted && credit_usd >= dec!(1);
     let bonus_amount = if grant_bonus_now {
-        state.config.signup_bonus_credit_usd
+        first_deposit_bonus_usd(state.config.signup_bonus_credit_usd, has_referrer)
     } else {
         dec!(0)
     };
@@ -699,19 +730,28 @@ async fn apply_deposit_credit(
     .await?;
 
     if grant_bonus_now {
+        let bonus_note = if has_referrer {
+            "Thưởng nạp đầu >= $1.00 nhân đôi ($10 Credit qua mã giới thiệu)"
+        } else {
+            "First deposit >= $1.00 promotional bonus"
+        };
         sqlx::query(
             r#"
             INSERT INTO credit_transactions (
                 user_id, tx_type, amount, balance_before, balance_after, note, metadata
             )
-            VALUES ($1, 'FIRST_DEPOSIT_BONUS', $2, $3, $4, 'First deposit >= $1.00 promotional bonus', $5)
+            VALUES ($1, 'FIRST_DEPOSIT_BONUS', $2, $3, $4, $5, $6)
             "#,
         )
         .bind(user_id)
         .bind(bonus_amount)
         .bind(after_deposit)
         .bind(final_balance)
-        .bind(serde_json::json!({ "trigger_deposit": credit_usd.to_string() }))
+        .bind(bonus_note)
+        .bind(serde_json::json!({
+            "trigger_deposit": credit_usd.to_string(),
+            "referral_doubled_bonus": has_referrer
+        }))
         .execute(&mut *tx)
         .await?;
     }

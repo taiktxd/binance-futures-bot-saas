@@ -40,11 +40,34 @@ pub fn partner_tier_name(activated_f1_count: i64) -> &'static str {
     }
 }
 
+pub const REFERRAL_FIRST_SUB_DISCOUNT_RATE: Decimal = dec!(0.10);
+
+pub fn first_deposit_bonus_usd(base_bonus: Decimal, has_referrer: bool) -> Decimal {
+    if has_referrer {
+        (base_bonus * dec!(2)).round_dp(8)
+    } else {
+        base_bonus.round_dp(8)
+    }
+}
+
 pub fn subscription_plan_price_usd(plan: SubscriptionPlan) -> Option<Decimal> {
     match plan {
         SubscriptionPlan::Standard => Some(dec!(29)),
         SubscriptionPlan::Pro => Some(dec!(79)),
         SubscriptionPlan::Inactive | SubscriptionPlan::Trial => None,
+    }
+}
+
+pub fn subscription_checkout_price_usd(
+    plan: SubscriptionPlan,
+    has_referrer: bool,
+    is_first_subscription: bool,
+) -> Option<Decimal> {
+    let base = subscription_plan_price_usd(plan)?;
+    if has_referrer && is_first_subscription {
+        Some((base * (dec!(1) - REFERRAL_FIRST_SUB_DISCOUNT_RATE)).round_dp(2))
+    } else {
+        Some(base)
     }
 }
 
@@ -182,6 +205,29 @@ mod tests {
         );
         assert_eq!(
             subscription_plan_price_usd(SubscriptionPlan::Pro),
+            Some(dec!(79))
+        );
+    }
+
+    #[test]
+    fn referral_invitee_perks_double_bonus_and_discount_first_subscription() {
+        assert_eq!(first_deposit_bonus_usd(dec!(5), false), dec!(5));
+        assert_eq!(first_deposit_bonus_usd(dec!(5), true), dec!(10));
+
+        assert_eq!(
+            subscription_checkout_price_usd(SubscriptionPlan::Standard, true, true),
+            Some(dec!(26.10))
+        );
+        assert_eq!(
+            subscription_checkout_price_usd(SubscriptionPlan::Pro, true, true),
+            Some(dec!(71.10))
+        );
+        assert_eq!(
+            subscription_checkout_price_usd(SubscriptionPlan::Standard, true, false),
+            Some(dec!(29))
+        );
+        assert_eq!(
+            subscription_checkout_price_usd(SubscriptionPlan::Pro, false, true),
             Some(dec!(79))
         );
     }
