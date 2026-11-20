@@ -602,7 +602,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       if (!area) return;
       const unreadCount = state.notifications.filter((n) => n.unread).length;
       const bellBtn = `
-        <button type="button" onclick="toggleNotifPanel()" class="relative p-2 rounded-lg border border-[#A5A79B]/25 bg-[#1C1818] text-[#E8D2B5] hover:border-[#E8D2B5]/50" aria-label="Thông báo">
+        <button type="button" onclick="toggleNotifPanel()" class="relative p-1.5 sm:p-2 rounded-lg border border-[#A5A79B]/25 bg-[#1C1818] text-[#E8D2B5] hover:border-[#E8D2B5]/50 shrink-0" aria-label="Thông báo">
           <i data-lucide="bell" class="w-4 h-4"></i>
           ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#D64545] text-white text-[10px] font-bold num flex items-center justify-center">${unreadCount}</span>` : ''}
         </button>
@@ -610,17 +610,17 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       if (state.user) {
         area.innerHTML = `
           ${bellBtn}
-          ${isAdmin ? `<button type="button" onclick="navigate('admin')" class="lg:hidden px-2.5 py-1 text-[11px] font-semibold btn-wine rounded whitespace-nowrap">Admin</button>` : ''}
-          <span class="hidden sm:inline text-xs num px-3 py-1 rounded bg-[#201C1B] border border-[#A5A79B]/25 text-[#E8D2B5] whitespace-nowrap">
+          ${isAdmin ? `<button type="button" onclick="navigate('admin')" class="lg:hidden px-2 py-1 text-[11px] font-semibold btn-wine rounded whitespace-nowrap shrink-0">Admin</button>` : ''}
+          <span class="hidden sm:inline text-xs num px-2.5 sm:px-3 py-1 rounded bg-[#201C1B] border border-[#A5A79B]/25 text-[#E8D2B5] whitespace-nowrap">
             ${isAdmin ? 'ADMIN · ' : ''}${fmtUsd(state.user.credit_balance)}
           </span>
-          <button type="button" onclick="logoutUser()" class="px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs btn-stone rounded whitespace-nowrap">Thoát</button>
+          <button type="button" onclick="logoutUser()" class="px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs btn-stone rounded whitespace-nowrap shrink-0">Thoát</button>
         `;
       } else {
         area.innerHTML = `
           ${bellBtn}
-          <button type="button" onclick="navigate('login')" class="px-3 py-1.5 text-xs text-[#A5A79B] hover:text-[#E8D2B5] whitespace-nowrap">Đăng nhập</button>
-          <button type="button" onclick="navigate('register')" class="px-3.5 py-1.5 text-xs font-semibold btn-champagne rounded whitespace-nowrap">Đăng ký</button>
+          <button type="button" onclick="navigate('login')" class="px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs text-[#A5A79B] hover:text-[#E8D2B5] whitespace-nowrap shrink-0">Đăng nhập</button>
+          <button type="button" onclick="navigate('register')" class="px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-semibold btn-champagne rounded whitespace-nowrap shrink-0">Đăng ký</button>
         `;
       }
     }
@@ -702,21 +702,21 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 </div>
 
                 <div class="space-y-3.5">
-                  <div class="grid grid-cols-2 gap-3">
-                    <div class="panel-inset rounded-lg p-3.5">
+                  <div class="grid grid-cols-2 gap-2.5 sm:gap-3">
+                    <div class="panel-inset rounded-lg p-3 sm:p-3.5 min-w-0">
                       <div class="text-[11px] text-[#A5A79B]">Ưu đãi kích hoạt</div>
-                      <div class="mt-1 text-base font-bold num text-[#E8D2B5]">Nạp $1 tặng $5</div>
+                      <div class="mt-1 text-sm sm:text-base font-bold num text-[#E8D2B5] truncate">Nạp $1 tặng đến $10</div>
                     </div>
-                    <div class="panel-inset rounded-lg p-3.5">
+                    <div class="panel-inset rounded-lg p-3 sm:p-3.5 min-w-0">
                       <div class="text-[11px] text-[#A5A79B]">Hoa hồng đối tác</div>
-                      <div class="mt-1 text-base font-bold num text-[#34B37E]">Lên đến 35%</div>
+                      <div class="mt-1 text-sm sm:text-base font-bold num text-[#34B37E] truncate">Lên đến 35%</div>
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-2.5">
-                    <button type="button" onclick="navigate('register')" class="btn-champagne py-3 text-xs font-bold rounded-lg">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button type="button" onclick="navigate('register')" class="btn-champagne py-3 px-3 text-xs font-bold rounded-lg">
                       Mở tài khoản ngay
                     </button>
-                    <button type="button" onclick="navigate('earn')" class="btn-wine py-3 text-xs font-semibold rounded-lg">
+                    <button type="button" onclick="navigate('earn')" class="btn-wine py-3 px-3 text-xs font-semibold rounded-lg">
                       Kiếm tiền cùng <span class="extreme-run">EXTREME</span>
                     </button>
                   </div>
@@ -724,28 +724,28 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
               </div>
 
               <div class="lg:col-span-7 flex flex-col justify-between bg-[#130A0A]">
-                <div id="landing-3d" class="w-full h-[270px] sm:h-[360px]"></div>
+                <div id="landing-3d" class="w-full h-[220px] sm:h-[340px]"></div>
                 <div class="grid grid-cols-3 border-t border-[#A5A79B]/20 bg-[#181313]/95 divide-x divide-[#A5A79B]/20">
-                  <div class="p-3.5">
-                    <div class="flex items-center justify-between text-[11px]">
+                  <div class="p-2.5 sm:p-3.5 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 text-[10px] sm:text-[11px]">
                       <span class="font-semibold text-[#A5A79B]">BTCUSDT</span>
                       <span id="pct-BTCUSDT" class="num"></span>
                     </div>
-                    <div id="price-BTCUSDT" class="mt-1 text-sm sm:text-base font-bold num text-[#E8D2B5]">Đang tải</div>
+                    <div id="price-BTCUSDT" class="mt-1 text-xs sm:text-base font-bold num text-[#E8D2B5] truncate">Đang tải</div>
                   </div>
-                  <div class="p-3.5">
-                    <div class="flex items-center justify-between text-[11px]">
+                  <div class="p-2.5 sm:p-3.5 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 text-[10px] sm:text-[11px]">
                       <span class="font-semibold text-[#A5A79B]">ETHUSDT</span>
                       <span id="pct-ETHUSDT" class="num"></span>
                     </div>
-                    <div id="price-ETHUSDT" class="mt-1 text-sm sm:text-base font-bold num text-[#E8D2B5]">Đang tải</div>
+                    <div id="price-ETHUSDT" class="mt-1 text-xs sm:text-base font-bold num text-[#E8D2B5] truncate">Đang tải</div>
                   </div>
-                  <div class="p-3.5">
-                    <div class="flex items-center justify-between text-[11px]">
+                  <div class="p-2.5 sm:p-3.5 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 text-[10px] sm:text-[11px]">
                       <span class="font-semibold text-[#A5A79B]">VÀNG</span>
                       <span id="pct-PAXGUSDT" class="num"></span>
                     </div>
-                    <div id="price-PAXGUSDT" class="mt-1 text-sm sm:text-base font-bold num text-[#E8D2B5]">Đang tải</div>
+                    <div id="price-PAXGUSDT" class="mt-1 text-xs sm:text-base font-bold num text-[#E8D2B5] truncate">Đang tải</div>
                   </div>
                 </div>
               </div>
@@ -800,11 +800,11 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                   Mỗi khách hàng nhập mã của bạn khi đăng ký sẽ được <strong class="text-[#34B37E]">nhân đôi thưởng khởi đầu lên $10.00 Credit</strong> (khi nạp từ $1.00) và <strong class="text-[#E8D2B5]">giảm 10% gói tháng đầu</strong>. Bạn nhận hoa hồng gói tháng, chia sẻ phí HWM trọn đời 2 tầng và quỹ thưởng Top Leader.
                 </p>
               </div>
-              <div class="panel-inset rounded-lg p-4 space-y-2 shrink-0 min-w-[260px]">
+              <div class="panel-inset rounded-lg p-4 space-y-2 w-full lg:w-auto lg:min-w-[280px] min-w-0 shrink-0">
                 <div class="text-[11px] text-[#A5A79B]">Liên kết giới thiệu của bạn</div>
-                <div class="flex items-center gap-2">
-                  <code class="text-xs num text-[#E8D2B5] truncate max-w-[190px]">${escapeHtml(refLink)}</code>
-                  <button type="button" onclick="copyText('${escapeHtml(refLink)}', 'Đã sao chép liên kết giới thiệu.')" class="btn-champagne px-3 py-1.5 text-xs font-bold rounded shrink-0">Sao chép</button>
+                <div class="flex items-center gap-2 min-w-0">
+                  <code class="text-xs num text-[#E8D2B5] truncate flex-1 min-w-0">${escapeHtml(refLink)}</code>
+                  <button type="button" onclick="copyText('${escapeHtml(refLink)}', 'Đã sao chép liên kết giới thiệu.')" class="btn-champagne px-3 py-1.5 text-xs font-bold rounded shrink-0 whitespace-nowrap">Sao chép</button>
                 </div>
                 <div class="text-[10px] text-[#A5A79B]">Mã đối tác: <strong class="text-[#E8D2B5] num">${escapeHtml(refCode)}</strong></div>
               </div>
@@ -1224,26 +1224,26 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
               </div>
               ` : ''}
 
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <div class="panel-wine rounded-xl p-4">
-                  <div class="text-xs text-[#E8D2B5]/75">Số dư Ví Credit</div>
-                  <div class="mt-1.5 text-2xl font-bold num text-[#E8D2B5]">${fmtUsd(credit)}</div>
-                  <div class="mt-1 text-[11px] text-[#E8D2B5]/70">${bonusClaimed ? `Đã nhận thưởng $${bonusUsd}.00` : `Nạp tối thiểu $1 để nhận $${bonusUsd}`}</div>
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                <div class="panel-wine rounded-xl p-3.5 sm:p-4 min-w-0">
+                  <div class="text-[11px] sm:text-xs text-[#E8D2B5]/75">Số dư Ví Credit</div>
+                  <div class="mt-1.5 text-lg sm:text-2xl font-bold num text-[#E8D2B5] truncate">${fmtUsd(credit)}</div>
+                  <div class="mt-1 text-[10.5px] sm:text-[11px] text-[#E8D2B5]/70">${bonusClaimed ? `Đã nhận thưởng $${bonusUsd}.00` : `Nạp tối thiểu $1 để nhận $${bonusUsd}`}</div>
                 </div>
-                <div class="panel rounded-xl p-4">
-                  <div class="text-xs text-[#A5A79B]">Gói hiện tại</div>
-                  <div class="mt-1.5 text-xl font-bold text-[#E8D2B5]">${escapeHtml(planLabel(state.user?.plan, state.user?.role))}</div>
-                  <div class="mt-1 text-[11px] text-[#A5A79B]">${isAdmin ? 'Toàn quyền hệ thống' : (state.user?.plan_expires_at ? 'Hạn: ' + fmtDateTime(state.user.plan_expires_at) : 'Nâng cấp gói tháng tại Ví')}</div>
+                <div class="panel rounded-xl p-3.5 sm:p-4 min-w-0">
+                  <div class="text-[11px] sm:text-xs text-[#A5A79B]">Gói hiện tại</div>
+                  <div class="mt-1.5 text-base sm:text-xl font-bold text-[#E8D2B5] truncate">${escapeHtml(planLabel(state.user?.plan, state.user?.role))}</div>
+                  <div class="mt-1 text-[10.5px] sm:text-[11px] text-[#A5A79B] truncate">${isAdmin ? 'Toàn quyền hệ thống' : (state.user?.plan_expires_at ? 'Hạn: ' + fmtDateTime(state.user.plan_expires_at) : 'Nâng cấp gói tháng tại Ví')}</div>
                 </div>
-                <div class="panel rounded-xl p-4">
-                  <div class="text-xs text-[#A5A79B]">Đỉnh Lợi Nhuận (HWM)</div>
-                  <div class="mt-1.5 text-2xl font-bold num text-[#E8D2B5]">${fmtUsd(hwm)}</div>
-                  <div class="mt-1 text-[11px] num ${cumPnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">Lãi ròng đã chốt: ${pnlSign}${fmtUsd(Math.abs(cumPnl))}</div>
+                <div class="panel rounded-xl p-3.5 sm:p-4 min-w-0">
+                  <div class="text-[11px] sm:text-xs text-[#A5A79B]">Đỉnh Lợi Nhuận (HWM)</div>
+                  <div class="mt-1.5 text-lg sm:text-2xl font-bold num text-[#E8D2B5] truncate">${fmtUsd(hwm)}</div>
+                  <div class="mt-1 text-[10.5px] sm:text-[11px] num truncate ${cumPnl >= 0 ? 'text-[#34B37E]' : 'text-[#D64545]'}">Lãi ròng: ${pnlSign}${fmtUsd(Math.abs(cumPnl))}</div>
                 </div>
-                <div class="panel rounded-xl p-4">
-                  <div class="text-xs text-[#A5A79B]">Cấu hình đang chạy</div>
-                  <div class="mt-1.5 text-2xl font-bold num text-[#E8D2B5]">${activeCount} / ${state.configs.length}</div>
-                  <div class="mt-1 text-[11px] text-[#A5A79B]">Tự động ghép chiến lược</div>
+                <div class="panel rounded-xl p-3.5 sm:p-4 min-w-0">
+                  <div class="text-[11px] sm:text-xs text-[#A5A79B]">Cấu hình đang chạy</div>
+                  <div class="mt-1.5 text-lg sm:text-2xl font-bold num text-[#E8D2B5]">${activeCount} / ${state.configs.length}</div>
+                  <div class="mt-1 text-[10.5px] sm:text-[11px] text-[#A5A79B]">Tự động ghép chiến lược</div>
                 </div>
               </div>
 
@@ -1282,9 +1282,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 <div class="p-6 text-xs text-[#A5A79B] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <span>Chưa có vị thế Futures nào đang mở trên tài khoản.</span>
                   <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="navigate('earn')" class="btn-stone px-4 py-2 rounded-lg font-semibold">Kiếm tiền đối tác</button>
-                    <button type="button" onclick="navigate('api-keys')" class="btn-champagne px-4 py-2 rounded-lg font-semibold">Kết nối API</button>
-                    <button type="button" onclick="navigate('bots')" class="btn-wine px-4 py-2 rounded-lg font-semibold">Cài đặt rủi ro</button>
+                    <button type="button" onclick="navigate('trades')" class="btn-stone px-3.5 py-2 rounded-lg font-semibold">Lịch sử lệnh</button>
+                    <button type="button" onclick="navigate('earn')" class="btn-stone px-3.5 py-2 rounded-lg font-semibold">Kiếm tiền đối tác</button>
+                    <button type="button" onclick="navigate('api-keys')" class="btn-champagne px-3.5 py-2 rounded-lg font-semibold">Kết nối API</button>
+                    <button type="button" onclick="navigate('bots')" class="btn-wine px-3.5 py-2 rounded-lg font-semibold">Cài đặt rủi ro</button>
                   </div>
                 </div>
                 ` : `
@@ -1335,10 +1336,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 </div>
               </div>
 
-              <form id="api-form" class="panel rounded-xl p-5 space-y-4">
-                <div class="flex items-center justify-between border-b border-[#A5A79B]/20 pb-3">
-                  <h1 class="text-sm font-bold text-[#E8D2B5]">Kết nối API Binance USD-M Futures</h1>
-                  <span class="text-[10px] font-semibold px-2.5 py-1 rounded bg-[#590907] text-[#E8D2B5] border border-[#E8D2B5]/25">
+              <form id="api-form" class="panel rounded-xl p-4 sm:p-5 space-y-4">
+                <div class="flex items-center justify-between gap-2 border-b border-[#A5A79B]/20 pb-3">
+                  <h1 class="text-sm font-bold text-[#E8D2B5] min-w-0">Kết nối API Binance USD-M Futures</h1>
+                  <span class="text-[10px] font-semibold px-2.5 py-1 rounded bg-[#590907] text-[#E8D2B5] border border-[#E8D2B5]/25 whitespace-nowrap shrink-0">
                     ${isAdmin ? 'QUYỀN ADMIN' : 'TÀI KHOẢN LIVE'}
                   </span>
                 </div>
@@ -1362,7 +1363,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                   </div>
                 </div>
                 <div id="api-form-msg" class="hidden p-3 text-xs rounded-lg"></div>
-                <button type="submit" class="btn-champagne px-5 py-2.5 text-xs font-bold rounded-lg">Lưu &amp; Kiểm tra kết nối</button>
+                <button type="submit" class="btn-champagne w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-lg">Lưu &amp; Kiểm tra kết nối</button>
               </form>
 
               <div class="panel rounded-xl overflow-hidden">
@@ -1471,9 +1472,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                     { id: 'ETHUSDT', name: 'Ethereum' },
                     { id: 'XAUUSDT', name: 'Vàng' },
                   ].map((c) => `
-                    <button type="button" onclick="setRiskField('symbol','${c.id}')" class="p-3.5 rounded-lg text-left border transition-colors ${d.symbol === c.id ? 'bg-[#590907] text-[#E8D2B5] border-[#E8D2B5]/50' : 'panel-inset text-[#A5A79B] hover:text-[#E8D2B5]'}">
-                      <div class="text-xs num font-bold">${c.id}</div>
-                      <div class="text-[11px] opacity-80 mt-0.5">${c.name}</div>
+                    <button type="button" onclick="setRiskField('symbol','${c.id}')" class="p-2.5 sm:p-3.5 rounded-lg text-left border transition-colors min-w-0 ${d.symbol === c.id ? 'bg-[#590907] text-[#E8D2B5] border-[#E8D2B5]/50' : 'panel-inset text-[#A5A79B] hover:text-[#E8D2B5]'}">
+                      <div class="text-[11px] sm:text-xs num font-bold truncate">${c.id}</div>
+                      <div class="text-[10.5px] sm:text-[11px] opacity-80 mt-0.5 truncate">${c.name}</div>
                     </button>
                   `).join('')}
                 </div>
@@ -1546,7 +1547,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                 </div>
 
                 <div class="flex justify-end">
-                  <button type="button" onclick="saveRiskConfig()" class="btn-champagne px-5 py-2.5 text-xs font-bold rounded-lg">Lưu cấu hình rủi ro</button>
+                  <button type="button" onclick="saveRiskConfig()" class="btn-champagne w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-lg">Lưu cấu hình rủi ro</button>
                 </div>
               </div>
 
@@ -1606,7 +1607,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
             <div class="space-y-4">
               ${renderViewStateBanner()}
               <div class="panel rounded-xl overflow-hidden">
-                <div class="px-5 py-4 border-b border-[#A5A79B]/20 flex items-center justify-between gap-3">
+                <div class="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-[#A5A79B]/20 flex flex-wrap items-center justify-between gap-2">
                   <h1 class="text-sm font-bold text-[#E8D2B5]">Lịch sử lệnh đã chốt</h1>
                   <select onchange="setTradeSymbolFilter(this.value)" class="px-3 py-1.5 text-xs num panel-inset rounded-lg text-[#E8D2B5]">
                     <option value="" ${state.tradeSymbolFilter === '' ? 'selected' : ''}>Tất cả cặp</option>
@@ -1669,10 +1670,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
               ${renderViewStateBanner()}
               ${renderNoticeBanner()}
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="panel rounded-xl p-5 space-y-3.5">
-                  <div class="flex items-center justify-between">
+                <div class="panel rounded-xl p-4 sm:p-5 space-y-3.5">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="text-xs text-[#A5A79B]">Ví Credit (Trừ phí 20% HWM)</div>
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${bonusClaimed ? 'bg-[#34B37E]/15 text-[#34B37E]' : 'bg-[#590907] text-[#E8D2B5]'}">
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap shrink-0 ${bonusClaimed ? 'bg-[#34B37E]/15 text-[#34B37E]' : 'bg-[#590907] text-[#E8D2B5]'}">
                       ${bonusClaimed ? `Đã nhận $${bonusUsd} thưởng` : `Nạp tối thiểu $1 nhận $${bonusUsd}`}
                     </span>
                   </div>
@@ -1680,27 +1681,29 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                   <p class="text-xs text-[#A5A79B] leading-relaxed">
                     Nguyên tắc chống spam: tài khoản mới cần nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> để hệ thống tự động cộng thêm <strong class="text-[#34B37E]">$${bonusUsd}.00 khuyến mãi</strong>${hasReferrer ? ' (đã nhân đôi nhờ mã giới thiệu)' : ' (nhập mã giới thiệu lúc đăng ký được nhân đôi lên $10.00)'} — chỉ dùng trừ phí HWM, không rút tiền mặt.
                   </p>
-                  <div class="flex flex-wrap items-end gap-2 pt-1">
-                    <div class="flex-1 min-w-[120px]">
+                  <div class="flex flex-col sm:flex-row sm:items-end gap-2 pt-1">
+                    <div class="flex-1 min-w-0">
                       <label class="block text-[11px] text-[#A5A79B] mb-1">Số tiền nạp (tối thiểu $1.00)</label>
                       <input id="dep-amt" type="number" min="1" step="1" value="1" class="w-full px-3 py-2 text-xs num panel-inset rounded-lg text-[#E8D2B5]" />
                     </div>
-                    <button type="button" onclick="createDeposit('VietQR')" class="btn-champagne px-3.5 py-2 text-xs font-bold rounded-lg whitespace-nowrap">Nạp VietQR</button>
-                    <button type="button" onclick="createDeposit('USDT BEP20')" class="btn-stone px-3.5 py-2 text-xs font-semibold rounded-lg whitespace-nowrap">USDT BEP20</button>
+                    <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                      <button type="button" onclick="createDeposit('VietQR')" class="btn-champagne px-3.5 py-2 text-xs font-bold rounded-lg whitespace-nowrap">Nạp VietQR</button>
+                      <button type="button" onclick="createDeposit('USDT BEP20')" class="btn-stone px-3.5 py-2 text-xs font-semibold rounded-lg whitespace-nowrap">USDT BEP20</button>
+                    </div>
                   </div>
                 </div>
 
-                <div class="panel-wine rounded-xl p-5 space-y-3">
-                  <div class="flex items-center justify-between gap-2">
+                <div class="panel-wine rounded-xl p-4 sm:p-5 space-y-3">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="text-xs text-[#E8D2B5]/75">Gói thuê bao tháng</div>
-                    ${firstSubDiscount ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#34B37E]/25 text-[#34B37E]">GIẢM 10% THÁNG ĐẦU</span>' : ''}
+                    ${firstSubDiscount ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#34B37E]/25 text-[#34B37E] whitespace-nowrap shrink-0">GIẢM 10% THÁNG ĐẦU</span>' : ''}
                   </div>
                   <div class="text-2xl font-bold text-[#E8D2B5]">${escapeHtml(planLabel(state.user?.plan, state.user?.role))}</div>
                   ${state.user?.plan_expires_at ? `<div class="text-[11px] num text-[#E8D2B5]/80">Hiệu lực đến: ${escapeHtml(fmtDateTime(state.user.plan_expires_at))}</div>` : ''}
                   <p class="text-xs text-[#E8D2B5]/80 leading-relaxed">${firstSubDiscount ? 'Ưu đãi mã giới thiệu: giảm ngay 10% cho tháng đầu tiên — Gói Tiêu chuẩn còn $26.10 (gốc $29), Gói Chuyên nghiệp còn $71.10 (gốc $79).' : 'Nâng cấp Gói Tiêu chuẩn ($29/tháng) hoặc Chuyên nghiệp ($79/tháng) bằng Ví Credit để mở toàn bộ 3 cặp giao dịch không giới hạn.'}</p>
-                  <div class="flex flex-wrap gap-2 pt-1">
-                    <button type="button" onclick="subscribePlan('STANDARD')" class="btn-champagne px-4 py-2 text-xs font-bold rounded-lg">Chọn gói ${stdLabel}</button>
-                    <button type="button" onclick="subscribePlan('PRO')" class="btn-stone px-4 py-2 text-xs font-semibold rounded-lg">Chọn gói ${proLabel}</button>
+                  <div class="flex flex-col sm:flex-row flex-wrap gap-2 pt-1">
+                    <button type="button" onclick="subscribePlan('STANDARD')" class="btn-champagne w-full sm:w-auto px-4 py-2 text-xs font-bold rounded-lg">Chọn gói ${stdLabel}</button>
+                    <button type="button" onclick="subscribePlan('PRO')" class="btn-stone w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg">Chọn gói ${proLabel}</button>
                   </div>
                 </div>
               </div>
@@ -1790,7 +1793,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
               </div>
 
               ${es ? `
-              <div class="grid grid-cols-2 lg:grid-cols-6 gap-3">
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
                 <div class="panel rounded-xl p-3.5 text-xs">
                   <div class="text-[#A5A79B]">WS Feed</div>
                   <div class="mt-1 font-bold ${es.ws_feed_connected ? 'text-[#34B37E]' : 'text-[#D64545]'}">${es.ws_feed_connected ? 'CONNECTED' : 'OFFLINE'}</div>
@@ -1842,8 +1845,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
                           ${w.admin_note ? `<div class="text-[11px] text-[#E8D2B5]/80">Ghi chú: ${escapeHtml(w.admin_note)}</div>` : ''}
                         </div>
                         ${w.status === 'PENDING' ? `
-                        <div class="flex flex-wrap items-center gap-2 shrink-0">
-                          <input id="wd-note-${escapeHtml(w.id)}" type="text" placeholder="Ghi chú duyệt / lý do từ chối" class="px-2.5 py-1.5 text-xs panel-inset rounded-lg text-[#E8D2B5] w-48" />
+                        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto shrink-0">
+                          <input id="wd-note-${escapeHtml(w.id)}" type="text" placeholder="Ghi chú duyệt / lý do từ chối" class="px-2.5 py-1.5 text-xs panel-inset rounded-lg text-[#E8D2B5] w-full sm:w-48" />
                           <button type="button" onclick="adminProcessWithdrawal('${escapeHtml(w.id)}', 'APPROVED')" class="btn-champagne px-3 py-1.5 text-xs font-bold rounded-lg">Duyệt</button>
                           <button type="button" onclick="adminProcessWithdrawal('${escapeHtml(w.id)}', 'REJECTED')" class="px-3 py-1.5 text-xs border border-[#D64545]/50 text-[#D64545] rounded-lg font-semibold">Từ chối &amp; Hoàn</button>
                         </div>
@@ -1884,9 +1887,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         const savedRef = localStorage.getItem('ex_referred_by') || '';
         root.innerHTML = `
           <div class="max-w-md mx-auto mt-6 panel rounded-xl p-6 space-y-4">
-            <div class="flex items-center justify-between border-b border-[#A5A79B]/20 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#A5A79B]/20 pb-3">
               <h1 class="text-base font-bold text-[#E8D2B5]">${isReg ? 'Tạo tài khoản EXTREME' : 'Đăng nhập EXTREME'}</h1>
-              <span id="reg-perk-pill" class="text-[11px] font-semibold num text-[#34B37E]">${isReg ? (savedRef ? 'Nạp $1 tặng $10 + Giảm 10%' : 'Nạp $1 tặng đến $10') : ''}</span>
+              <span id="reg-perk-pill" class="text-[11px] font-semibold num text-[#34B37E] whitespace-nowrap shrink-0">${isReg ? (savedRef ? 'Nạp $1 tặng $10 + Giảm 10%' : 'Nạp $1 tặng đến $10') : ''}</span>
             </div>
             ${isReg ? `<div class="p-3 text-xs rounded-lg panel-inset text-[#A5A79B]">Tài khoản mới khởi tạo với $0.00 Credit. Nạp lần đầu tối thiểu <strong class="text-[#E8D2B5]">$1.00</strong> nhận ngay <strong class="text-[#34B37E]">$5.00</strong> — hoặc <strong class="text-[#34B37E]">$10.00 Credit + giảm 10% gói tháng đầu</strong> khi có mã giới thiệu.</div>` : ''}
             <div id="auth-msg" class="hidden p-3 text-xs rounded-lg"></div>

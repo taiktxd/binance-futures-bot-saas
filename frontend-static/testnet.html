@@ -8,16 +8,22 @@
   <script src="./config.js"></script>
   <script type="module" src="./testnet.js"></script>
   <style>
-    body { background: #110e0e; color: #e8d2b5; font: 16px system-ui, sans-serif; margin: 0; }
-    main { max-width: 60rem; margin: auto; padding: 1.5rem; }
+    * { box-sizing: border-box; }
+    body { background: #110e0e; color: #e8d2b5; font: 15px/1.45 system-ui, sans-serif; margin: 0; }
+    main { max-width: 60rem; margin: auto; padding: 1rem; }
     a { color: inherit; }
     section, form { margin: 1rem 0; }
-    fieldset { display: flex; flex-wrap: wrap; gap: 1rem; border: 1px solid #a5a79b; }
-    label { display: grid; gap: .25rem; }
-    input, select, button { background: #251d1d; color: inherit; padding: .45rem; border: 1px solid #a5a79b; border-radius: .25rem; }
-    button { cursor: pointer; }
-    li { margin: .4rem 0; overflow-wrap: anywhere; }
-    ul { font-variant-numeric: tabular-nums; padding-left: 1.25rem; }
+    fieldset { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; border: 1px solid #a5a79b; border-radius: .5rem; padding: .85rem; }
+    label { display: grid; gap: .25rem; flex: 1 1 180px; min-width: 0; }
+    input, select, button { background: #251d1d; color: inherit; padding: .5rem .65rem; border: 1px solid #a5a79b; border-radius: .35rem; font: inherit; }
+    input, select { width: 100%; }
+    button { cursor: pointer; white-space: nowrap; }
+    li { margin: .5rem 0; overflow-wrap: anywhere; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+    ul { font-variant-numeric: tabular-nums; padding-left: 1.15rem; }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.35rem; }
+      fieldset button { width: 100%; }
+    }
   </style>
 </head>
 <body>
